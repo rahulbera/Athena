@@ -213,9 +213,9 @@ def generate_jobs(exe: str, cd: str,
     # If dry running, only print the commands
     if dry_run:
         for i, cmd in enumerate(commands, 1):
-            print(f"  [{i}/{len(commands)}] {cmd}")
-        print(f"\n{'='*60}")
-        print(f"Total: {len(commands)} experiments")
+            print(f"{cmd}")
+        #print(f"\n{'='*60}")
+        #print(f"Total: {len(commands)} experiments")
     
     else:
         # Submit jobs directly
