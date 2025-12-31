@@ -848,6 +848,11 @@ void CACHE::handle_read() {
         // update prefetch stats and reset prefetch bit
         if (block[set][way].prefetch) {
           pf_useful++;
+          if (block[set][way].pf_filled_from_offchip) {
+            pf_useful_came_from_offchip++;
+          } else {
+            pf_useful_came_from_onchip++;
+          }
           block[set][way].prefetch = 0;
         }
         block[set][way].used = 1;
@@ -900,6 +905,9 @@ void CACHE::handle_read() {
                   missing_load_rob_pos_hist[rq_entry.rob_position]++;
                   send_signal_to_core(read_cpu, rq_entry);
                   ooo_cpu[read_cpu].og_record_event(LLC_LOAD_MISS, 1, read_cpu);
+                } else if (rq_entry.is_data && rq_entry.type == PREFETCH) {
+                  // RBERA: if this is a prefetch going to off-chip, still mark the packet
+                  rq_entry.went_offchip = 1;
                 }
               }
             }
@@ -1005,9 +1013,9 @@ void CACHE::handle_read() {
 
             // update request
             if (MSHR.entry[mshr_index].type == PREFETCH) {
-              // RBERA: why calling it late even in case of prefetch request
-              // hitting another in-flight prefetch?
-              pf_late++;
+              if (rq_entry.type == LOAD) {
+                pf_late++;
+              }
               uint8_t prior_returned = MSHR.entry[mshr_index].returned;
               uint64_t prior_event_cycle = MSHR.entry[mshr_index].event_cycle;
               MSHR.entry[mshr_index] = rq_entry;
@@ -1225,6 +1233,11 @@ void CACHE::handle_prefetch() {
                   }
                 }
 
+                // RBERA: mark the packet
+                if (PQ.entry[index].is_data) {
+                  PQ.entry[index].went_offchip = 1;
+                }
+
                 // add it to MSHRs if this prefetch miss will be filled to this
                 // cache level
                 if (PQ.entry[index].fill_level <= fill_level) {
@@ -1393,6 +1406,11 @@ void CACHE::fill_cache(uint32_t set, uint32_t way, PACKET *packet) {
 #endif
   if (block[set][way].prefetch && (block[set][way].used == 0)) {
     pf_useless++;
+    if (block[set][way].pf_filled_from_offchip) {
+      pf_useless_came_from_offchip++;
+    } else {
+      pf_useless_came_from_onchip++;
+    }
   }
 
   if (block[set][way].valid == 1) // eviction
@@ -1406,10 +1424,16 @@ void CACHE::fill_cache(uint32_t set, uint32_t way, PACKET *packet) {
   }
   block[set][way].dirty = 0;
   block[set][way].prefetch = (packet->type == PREFETCH) ? 1 : 0;
+  block[set][way].pf_filled_from_offchip = (packet->type == PREFETCH) ? packet->went_offchip : 0;
   block[set][way].used = 0;
 
   if (block[set][way].prefetch) {
     pf_filled++;
+    if (block[set][way].pf_filled_from_offchip) {
+      pf_filled_from_offchip++;
+    } else {
+      pf_filled_from_onchip++;
+    }
   }
 
   block[set][way].delta = packet->delta;
@@ -1989,6 +2013,7 @@ void CACHE::return_data(PACKET *packet) {
   MSHR.entry[mshr_index].returned = COMPLETED;
   MSHR.entry[mshr_index].data = packet->data;
   MSHR.entry[mshr_index].pf_metadata = packet->pf_metadata;
+  MSHR.entry[mshr_index].went_offchip = packet->went_offchip;
 
   // ADD LATENCY
   if (MSHR.entry[mshr_index].event_cycle < current_core_cycle[packet->cpu]) {

@@ -24,7 +24,8 @@ public:
   uint8_t cache_type;
 
   // prefetch stats
-  uint64_t pf_requested, pf_issued, pf_useful, pf_useless, pf_dropped, pf_filled, pf_late;
+  uint64_t pf_requested, pf_issued, pf_useful, pf_useful_came_from_offchip, pf_useful_came_from_onchip, pf_useless, pf_useless_came_from_offchip,
+      pf_useless_came_from_onchip, pf_dropped, pf_filled, pf_late, pf_filled_from_offchip, pf_filled_from_onchip;
 
   // ZLANG: pollution
   std::unordered_map<uint64_t, bool> prefetch_eviction_map;
@@ -180,9 +181,15 @@ public:
     pf_requested = 0;
     pf_issued = 0;
     pf_useful = 0;
+    pf_useful_came_from_offchip = 0;
+    pf_useful_came_from_onchip = 0;
     pf_useless = 0;
+    pf_useless_came_from_offchip = 0;
+    pf_useless_came_from_onchip = 0;
     pf_dropped = 0;
     pf_filled = 0;
+    pf_filled_from_offchip = 0;
+    pf_filled_from_onchip = 0;
     pf_late = 0;
 
     RQ->ACCESS = 0;

@@ -13,7 +13,7 @@
 // CACHE BLOCK
 class BLOCK {
 public:
-  uint8_t valid, prefetch, dirty, used;
+  uint8_t valid, prefetch, pf_filled_from_offchip, dirty, used;
 
   int delta, depth, signature, confidence;
 
@@ -34,6 +34,7 @@ public:
   BLOCK() {
     valid = 0;
     prefetch = 0;
+    pf_filled_from_offchip = 0;
     dirty = 0;
     used = 0;
 

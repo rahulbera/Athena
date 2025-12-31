@@ -338,8 +338,14 @@ void print_roi_stats(uint32_t cpu, CACHE *cache) {
        << "Core_" << cpu << "_" << cache->NAME << "_prefetch_dropped " << cache->pf_dropped << endl
        << "Core_" << cpu << "_" << cache->NAME << "_prefetch_issued " << cache->pf_issued << endl
        << "Core_" << cpu << "_" << cache->NAME << "_prefetch_filled " << cache->pf_filled << endl
+       << "Core_" << cpu << "_" << cache->NAME << "_prefetch_filled_from_offchip " << cache->pf_filled_from_offchip << endl
+       << "Core_" << cpu << "_" << cache->NAME << "_prefetch_filled_from_onchip " << cache->pf_filled_from_onchip << endl
        << "Core_" << cpu << "_" << cache->NAME << "_prefetch_useful " << cache->pf_useful << endl
+       << "Core_" << cpu << "_" << cache->NAME << "_prefetch_useful_came_from_offchip " << cache->pf_useful_came_from_offchip << endl
+       << "Core_" << cpu << "_" << cache->NAME << "_prefetch_useful_came_from_onchip " << cache->pf_useful_came_from_onchip << endl
        << "Core_" << cpu << "_" << cache->NAME << "_prefetch_useless " << cache->pf_useless << endl
+       << "Core_" << cpu << "_" << cache->NAME << "_prefetch_useless_came_from_offchip " << cache->pf_useless_came_from_offchip << endl
+       << "Core_" << cpu << "_" << cache->NAME << "_prefetch_useless_came_from_onchip " << cache->pf_useless_came_from_onchip << endl
        << "Core_" << cpu << "_" << cache->NAME << "_prefetch_late " << cache->pf_late << endl
        << "Core_" << cpu << "_" << cache->NAME << "_average_miss_latency " << (1.0 * (cache->total_miss_latency)) / TOTAL_MISS << endl
        << endl
